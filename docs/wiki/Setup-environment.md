@@ -78,8 +78,8 @@ You must create a GitHub environment named `dev` in your repository settings. Se
 In this environment, set the following:
 
 - **Secrets:**
-  - `MONGODB_ATLAS_PUBLIC_KEY` (Atlas public API key, [see MongoDB docs](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for API key creation guidance)
-  - `MONGODB_ATLAS_PRIVATE_KEY` (Atlas private API key, [see MongoDB docs](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for API key creation guidance)
+  - `MONGODB_ATLAS_PUBLIC_API_KEY` (Atlas public API key, [see MongoDB docs](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for API key creation guidance)
+  - `MONGODB_ATLAS_PRIVATE_API_KEY` (Atlas private API key, [see MongoDB docs](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for API key creation guidance)
   - `TF_VAR_mongo_atlas_client_id` (Atlas client ID, to generate this value, please follow the [Mongo Atlas Metrics guide](./MongoAtlasMetrics_deployment_steps.md))
   - `TF_VAR_mongo_atlas_client_secret` (Atlas client secret, to generate this value, please follow the [Mongo Atlas Metrics guide](./MongoAtlasMetrics_deployment_steps.md))
   - `TF_VAR_org_id` (Atlas org ID)
