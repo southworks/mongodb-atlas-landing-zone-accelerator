@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Terraform module creates an Azure Key Vault with secure storage for MongoDB Atlas credentials. It implements security best practices including network isolation, private endpoints, and Service Federation Integration (SFI) alignment.
+This Terraform module creates an Azure Key Vault with secure storage for MongoDB Atlas credentials. It implements security best practices including network isolation, private endpoints, and Secure Future Initiative (SFI) alignment.
 
 ## Features
 
@@ -12,7 +12,6 @@ This Terraform module creates an Azure Key Vault with secure storage for MongoDB
 - **Purge Protection**: Enabled by default to prevent accidental deletion
 - **Soft Delete**: 7-day retention for deleted secrets
 - **Access Policies**: Built-in access policy for administrators
-- **SFI Alignment**: Supports Service Federation Integration pattern with managed identities
 
 ## Usage
 
