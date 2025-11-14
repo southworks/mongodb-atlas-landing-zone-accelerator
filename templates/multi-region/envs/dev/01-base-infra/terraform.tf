@@ -20,5 +20,14 @@ provider "azurerm" {
   features {}
 }
 
+# Aliased provider with Azure AD authentication for storage account access
+# Used by the Observability module since storage access keys are disabled,
+# and Terraform needs to authenticate via managed identity instead
+provider "azurerm" {
+  features {}
+  storage_use_azuread = true
+  alias               = "storage-use-azuread"
+}
+
 provider "mongodbatlas" {
 }

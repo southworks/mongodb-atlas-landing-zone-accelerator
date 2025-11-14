@@ -23,6 +23,7 @@ resource "azurerm_storage_account" "observability_function_storage" {
   account_replication_type        = "LRS"
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
+  shared_access_key_enabled       = false
   blob_properties {
     delete_retention_policy {
       days = 7
@@ -100,6 +101,15 @@ resource "azurerm_role_assignment" "function_storage_blob_contributor" {
   scope                = azurerm_storage_account.observability_function_storage.id
   role_definition_name = "Storage Blob Data Owner"
   principal_id         = azurerm_function_app_flex_consumption.observability_function.identity[0].principal_id
+}
+
+# Assign Terraform identity permissions to manage storage
+# This is needed since access keys are disabled on the storage account and the only way for Terraform to access it is via Managed Identity
+data "azurerm_client_config" "current" {}
+resource "azurerm_role_assignment" "terraform_storage_blob_contributor" {
+  scope                = azurerm_storage_account.observability_function_storage.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 resource "azurerm_monitor_private_link_scope" "pls" {
   name                  = var.private_link_scope_name

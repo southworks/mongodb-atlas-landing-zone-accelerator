@@ -121,6 +121,9 @@ module "observability" {
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
+  providers = {
+    azurerm = azurerm.storage-use-azuread
+  }
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {
