@@ -52,8 +52,7 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
 
   storage_container_type      = "blobContainer"
   storage_container_endpoint  = "${azurerm_storage_account.observability_function_storage.primary_blob_endpoint}${azurerm_storage_container.observability_function_container.name}"
-  storage_authentication_type = "StorageAccountConnectionString"
-  storage_access_key          = azurerm_storage_account.observability_function_storage.primary_access_key
+  storage_authentication_type = "SystemAssignedIdentity"
 
   runtime_name           = "dotnet-isolated"
   runtime_version        = "8.0"
@@ -65,10 +64,16 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
     "MONGODB_CLIENT_ID"                     = var.mongo_atlas_client_id
     "MONGODB_CLIENT_SECRET"                 = format("@Microsoft.KeyVault(SecretUri=%s)", var.mongo_atlas_client_secret_kv_uri)
     "MONGODB_GROUP_NAME"                    = var.mongo_group_name
-    "AzureWebJobsStorage"                   = azurerm_storage_account.observability_function_storage.primary_connection_string
+    "FUNCTIONS_EXTENSION_VERSION"           = "~4"
     "FUNCTION_FREQUENCY_CRON"               = var.function_frequency_cron
     "MONGODB_INCLUDED_METRICS"              = var.mongodb_included_metrics
     "MONGODB_EXCLUDED_METRICS"              = var.mongodb_excluded_metrics
+
+    # Workaround for Terraform provider issue: https://github.com/hashicorp/terraform-provider-azurerm/issues/30732
+    # Set AzureWebJobsStorage to empty string and AzureWebJobsStorage__blobServiceUri manually
+    # These settings should be automatically configured by Terraform but aren't due to the provider bug
+    "AzureWebJobsStorage"                 = ""
+    "AzureWebJobsStorage__blobServiceUri" = azurerm_storage_account.observability_function_storage.primary_blob_endpoint
   }
 
   identity {
@@ -78,6 +83,23 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
   virtual_network_subnet_id = var.function_subnet_id
 
   site_config {}
+
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to AzureWebJobsStorage (set to empty string due to provider bug)
+      # See: https://github.com/hashicorp/terraform-provider-azurerm/issues/30732
+      app_settings["AzureWebJobsStorage"]
+    ]
+  }
+}
+
+# -------------------------
+# Role Assignment for Storage Access
+# -------------------------
+resource "azurerm_role_assignment" "function_storage_blob_contributor" {
+  scope                = azurerm_storage_account.observability_function_storage.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = azurerm_function_app_flex_consumption.observability_function.identity[0].principal_id
 }
 resource "azurerm_monitor_private_link_scope" "pls" {
   name                  = var.private_link_scope_name
