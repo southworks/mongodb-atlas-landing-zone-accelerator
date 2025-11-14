@@ -1,7 +1,5 @@
 # Terraform Landing Zone for MongoDB Atlas on Azure
 
-## Solution Overview
-
 This repository provides a modular Terraform solution for deploying a secure MongoDB Atlas environment on Azure following the recommendations in [Deploy MongoDB Atlas in Azure](https://learn.microsoft.com/azure/architecture/databases/architecture/mongodb-atlas-baseline). It features:
 
 - Private networking and secure connectivity
