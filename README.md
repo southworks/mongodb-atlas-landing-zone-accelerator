@@ -24,7 +24,7 @@ It supports both **single-region** and **multi-region** deployments.
 
 The infrastructure can be deployed using the provided GitHub Actions workflows for CI/CD automation (see the [Pipeline Deployment Guide](docs/wiki/Deploy-with-pipeline.md)) or manually with Terraform (see the [Manual Deployment Steps](docs/wiki/Deploy-with-manual-steps.md)). The recommended method is deployment via workflows to ensure full automation, while manual deployment through the CLI remains available as an alternative.
 
-> For step-by-step deployment guidance, see the [deployment guide](docs/wiki/Introduction.md).
+> For step-by-step deployment guidance, see the [deployment guide](docs/wiki/Home.md).
 
 ---
 
@@ -45,15 +45,15 @@ For module-specific details, refer to [Modules.md](./docs/wiki/Modules.md):
 
 ## Disclaimer
 
-> **Warning:** Deploying this infrastructure is **NOT free**.  
+> **Warning:** Deploying this infrastructure is **NOT free**.
 > It provisions paid resources such as a dedicated MongoDB Atlas cluster (minimum M10 tier for Private Endpoints), Azure networking components, and other Azure services. Review pricing details in the [MongoDB Atlas Private Endpoint documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) before running `terraform apply`.
 
-This code is provided for demonstration purposes and should not be used in production without thorough testing.  
+This code is provided for demonstration purposes and should not be used in production without thorough testing.
 You are responsible for validating the configuration and ensuring it meets your environment's requirements.
 
 For questions or to discuss suitability for your use case, please create an issue in this repository.
 
-By using this repository, you agree to assume all risks and use it at your own discretion. Microsoft and the authors are not liable for damages or losses from its use.  
+By using this repository, you agree to assume all risks and use it at your own discretion. Microsoft and the authors are not liable for damages or losses from its use.
 See the [Support section](./SUPPORT.md) for details.
 
 ---
@@ -78,12 +78,12 @@ See the [FAQ](docs/wiki/FAQ.md) for common questions and answers.
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  
+This project welcomes contributions and suggestions.
 Before contributing, you will need to sign the [Microsoft Contributor License Agreement (CLA)](https://cla.opensource.microsoft.com).
 
 Pull requests will be checked automatically by the CLA bot to determine if a CLA is required. Follow its instructions as needed.
 
-We follow the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).  
+We follow the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or email [opencode@microsoft.com](mailto:opencode@microsoft.com).
 
 > Contribution details can be found in the [wiki](docs/wiki/Contributing.md).
@@ -92,6 +92,6 @@ For more information, see the [Code of Conduct FAQ](https://opensource.microsoft
 
 ## Trademarks
 
-This project may contain trademarks or logos for projects, products, or services.  
-Authorized use of Microsoft trademarks or logos is subject to and must follow the [Microsoft Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).  
+This project may contain trademarks or logos for projects, products, or services.
+Authorized use of Microsoft trademarks or logos is subject to and must follow the [Microsoft Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Any use of third-party trademarks or logos is subject to those third parties’ policies.
