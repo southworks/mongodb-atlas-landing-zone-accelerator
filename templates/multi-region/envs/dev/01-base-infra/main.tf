@@ -41,9 +41,9 @@ module "network" {
         }
       }
     } : null
-    observability_private_endpoint = each.value.deploy_observability_subnets ? {
-      name             = each.value.observability_private_endpoint_subnet_name
-      address_prefixes = each.value.observability_private_endpoint_subnet_prefixes
+    monitoring_ampls = each.value.deploy_observability_subnets ? {
+      name             = each.value.monitoring_ampls_subnet_name
+      address_prefixes = each.value.monitoring_ampls_subnet_prefixes
     } : null
     keyvault_private_endpoint = each.value.has_keyvault_private_endpoint ? {
       name              = each.value.keyvault_private_endpoint_subnet_name
@@ -97,6 +97,26 @@ module "vnet_peerings" {
   use_remote_gateways     = false
 }
 
+module "monitoring" {
+  source                          = "../../../../../modules/monitoring"
+  workspace_name                  = module.naming.log_analytics_workspace.name_unique
+  location                        = local.regions["zoneA"].location
+  resource_group_name             = data.azurerm_resource_group.infrastructure_rg.name
+  sku                             = local.log_analytics_workspace_sku
+  retention_in_days               = local.log_analytics_workspace_retention_in_days
+  internet_ingestion_enabled      = local.log_analytics_workspace_internet_ingestion_enabled
+  internet_query_enabled          = false
+  app_insights_name               = module.naming.application_insights.name_unique
+  private_link_scope_name         = "ampls-${module.naming.log_analytics_workspace.name_unique}"
+  vnet_id                         = module.network["zoneA"].vnet_id
+  vnet_name                       = module.network["zoneA"].vnet_name
+  ampls_pe_subnet_id              = module.network["zoneA"].subnet_ids["monitoring_ampls"]
+  pe_name                         = module.naming.private_endpoint.name_unique
+  network_interface_name          = module.naming.network_interface.name_unique
+  private_service_connection_name = module.naming.private_service_connection.name_unique
+  tags                            = local.tags
+}
+
 module "kv" {
   source                               = "../../../../../modules/keyvault"
   resource_group_name                  = data.azurerm_resource_group.infrastructure_rg.name
@@ -120,22 +140,19 @@ module "observability" {
   source                           = "../../../../../modules/observability"
   resource_group_name              = data.azurerm_resource_group.infrastructure_rg.name
   location                         = local.regions["zoneA"].location
-  log_analytics_workspace_name     = module.naming.log_analytics_workspace.name_unique
-  app_insights_name                = module.naming.application_insights.name_unique
+  log_analytics_workspace_id       = module.monitoring.workspace_id
+  app_insights_connection_string   = module.monitoring.app_insights_connection_string
   function_app_name                = module.naming.function_app.name_unique
   service_plan_name                = module.naming.app_service_plan.name_unique
   storage_account_name             = module.naming.storage_account.name_unique
   mongo_atlas_client_id            = local.mongo_atlas_client_id
   mongo_group_name                 = local.project_name
   function_subnet_id               = module.network["zoneA"].subnet_ids["observability_function_app"]
-  private_link_scope_name          = "private_link_scope_sr"
-  appinsights_assoc_name           = "private_link_appi_association"
   pe_name                          = module.naming.private_endpoint.name_unique
   network_interface_name           = module.naming.network_interface.name_unique
   private_service_connection_name  = module.naming.private_service_connection.name_unique
   vnet_id                          = module.network["zoneA"].vnet_id
   vnet_name                        = module.network["zoneA"].vnet_name
-  ampls_pe_subnet_id               = module.network["zoneA"].subnet_ids["observability_private_endpoint"]
   function_frequency_cron          = var.function_frequency_cron
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
@@ -145,12 +162,69 @@ module "observability" {
 
   depends_on = [
     module.network,
-    module.vnet_peerings
+    module.vnet_peerings,
+    module.monitoring
   ]
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {
   name = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
+}
+
+# Diagnostic settings for all Azure resources
+module "monitoring_diagnostics" {
+  source = "../../../../../modules/monitoring_diagnostics"
+
+  workspace_id   = module.monitoring.workspace_id
+  workspace_name = module.monitoring.workspace_name
+
+  diagnostic_setting_name_prefix = module.naming.monitor_diagnostic_setting.name
+
+  diagnostic_storage_account_ids = {
+    observability = module.observability.storage_account_id
+  }
+
+  diagnostic_function_app_ids = {
+    observability = module.observability.function_app_id
+  }
+
+  diagnostic_app_service_plan_ids = {
+    observability = module.observability.app_service_plan_id
+  }
+
+  diagnostic_key_vault_ids = {
+    core = module.kv.key_vault_id
+  }
+
+  diagnostic_virtual_network_ids = {
+    for region_key, network_module in module.network : region_key => network_module.vnet_id
+  }
+
+  diagnostic_application_insights_ids = {
+    monitoring = module.monitoring.app_insights_id
+  }
+
+  diagnostic_storage_blob_service_ids = {
+    observability = module.observability.storage_blob_service_id
+  }
+
+  diagnostic_storage_queue_service_ids = {
+    observability = module.observability.storage_queue_service_id
+  }
+
+  diagnostic_storage_table_service_ids = {
+    observability = module.observability.storage_table_service_id
+  }
+
+  diagnostic_storage_file_service_ids = {
+    observability = module.observability.storage_file_service_id
+  }
+  depends_on = [
+    module.monitoring,
+    module.network,
+    module.observability,
+    module.kv
+  ]
 }
 
 resource "azurerm_key_vault_access_policy" "function_app_kv_policy" {

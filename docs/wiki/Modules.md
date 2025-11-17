@@ -42,6 +42,13 @@
 - Creates bidirectional peering connections with configurable traffic and gateway settings.
 - Used in multi-region deployments to connect VNets across different regions.
 
+## [Monitoring Diagnostics Module](../../modules/monitoring_diagnostics/readme.md)
+
+- Configures Azure Monitor diagnostic settings for all infrastructure resources.
+- Connects Function Apps, Storage Accounts, Key Vaults, App Service Plans, Virtual Networks, Application Insights, and Storage sub-services to the centralized Log Analytics workspace.
+- Automatically discovers and enables all available log and metric categories for comprehensive observability.
+- Ensures consistent diagnostic coverage across the entire solution with predictable naming conventions.
+
 ## [Observability Module](../../modules/observability/readme.md)
 
 - Provisions observability infrastructure for monitoring MongoDB Atlas metrics in Azure. It creates all necessary resources to host a scheduled metrics collection Function App. The MongoAtlasMetrics app has to be deployed to the created Function App resource to send the metrics to the Application Insights. For more information, please refer the [MongoAtlasMetrics App Guide](./MongoAtlasMetrics_deployment_steps.md).

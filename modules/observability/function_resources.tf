@@ -51,7 +51,7 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
   instance_memory_in_mb  = 2048
 
   app_settings = {
-    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.observability_appinsights.connection_string
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = var.app_insights_connection_string
     "MONGODB_CLIENT_ID"                     = var.mongo_atlas_client_id
     "MONGODB_CLIENT_SECRET"                 = format("@Microsoft.KeyVault(SecretUri=%s)", var.mongo_atlas_client_secret_kv_uri)
     "MONGODB_GROUP_NAME"                    = var.mongo_group_name
@@ -73,6 +73,27 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
   }
 
   public_network_access_enabled = var.open_access
+
+  # Ignore changes to Application Insights connection string and Storage account settings managed by Azure
+  lifecycle {
+    ignore_changes = [
+      site_config[0].application_insights_connection_string,
+      app_settings["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+      app_settings["AzureWebJobsStorage"],
+    ]
+  }
+
+  depends_on = [
+    azurerm_storage_account.observability_function_storage,
+    azurerm_private_endpoint.storage_blob,
+    azurerm_private_endpoint.storage_queue,
+    azurerm_private_endpoint.storage_table,
+    azurerm_private_endpoint.storage_file,
+    azurerm_private_dns_zone_virtual_network_link.linktovnet_blob,
+    azurerm_private_dns_zone_virtual_network_link.linktovnet_queue,
+    azurerm_private_dns_zone_virtual_network_link.linktovnet_table,
+    azurerm_private_dns_zone_virtual_network_link.linktovnet_file
+  ]
 }
 
 resource "azurerm_role_assignment" "functionToStorage1" {

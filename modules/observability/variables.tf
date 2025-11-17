@@ -30,30 +30,29 @@ variable "log_analytics_workspace_sku" {
   type        = string
   default     = "PerGB2018"
 }
-
-variable "log_analytics_workspace_name" {
-  description = "Name for Log Analytics Workspace"
+variable "log_analytics_workspace_id" {
+  description = "ID of the central Log Analytics workspace for diagnostic settings"
   type        = string
 }
 
-variable "log_analytics_workspace_retention_days" {
-  description = "Retention period in days for Log Analytics Workspace"
-  type        = number
-  default     = 30
+variable "app_insights_connection_string" {
+  description = "Connection string for Application Insights (from monitoring module)"
+  type        = string
+  sensitive   = true
 }
 
-variable "app_insights_name" {
-  description = "Name for Application Insights instance"
+variable "network_interface_name" {
+  description = "General name for the Network Interface."
   type        = string
 }
 
-variable "private_link_scope_name" {
-  description = "Name for the Private Link Scope."
+variable "pe_name" {
+  description = "General name for the Private Endpoint."
   type        = string
 }
 
-variable "appinsights_assoc_name" {
-  description = "Name for the App Insights Scoped Resource Association."
+variable "private_service_connection_name" {
+  description = "General name for the Private Service Connections."
   type        = string
 }
 
@@ -82,11 +81,6 @@ variable "vnet_id" {
 
 variable "vnet_name" {
   description = "Name of the Virtual Network."
-  type        = string
-}
-
-variable "ampls_pe_subnet_id" {
-  description = "ID of the subnet for the AMPLS Private Endpoint."
   type        = string
 }
 
