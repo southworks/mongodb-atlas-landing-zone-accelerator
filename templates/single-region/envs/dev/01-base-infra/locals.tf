@@ -4,19 +4,23 @@ locals {
 
   project_name = var.project_name
 
-  vnet_address_space = ["10.0.0.0/26"]
+  vnet_address_space = ["10.0.0.0/25"]
 
-  private_subnet_prefixes                        = ["10.0.0.0/29"]
-  observability_function_app_subnet_prefixes     = ["10.0.0.8/29"]
-  observability_private_endpoint_subnet_prefixes = ["10.0.0.16/28"]
-  observability_storage_account_subnet_prefixes  = ["10.0.0.32/28"]
-  keyvault_private_endpoint_subnet_prefixes      = ["10.0.0.48/28"]
+  # Subnet CIDR blocks
+  # Layout: 10.0.0.0/25 provides 128 IPs (0-127)
+  private_subnet_prefixes                       = ["10.0.0.0/29"]  # 0-7 (8 IPs)
+  observability_function_app_subnet_prefixes    = ["10.0.0.8/29"]  # 8-15 (8 IPs)
+  # Reserved: 10.0.0.16/27 (16-47) - Reserved for future use
+  keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.48/28"] # 48-63 (16 IPs) - LOCKED, has active private endpoint
+  monitoring_ampls_subnet_prefixes              = ["10.0.0.64/27"] # 64-95 (32 IPs) - /27 requires 32-address boundary
+  observability_storage_account_subnet_prefixes = ["10.0.0.96/28"] # 96-111 (16 IPs)
 
-  private_subnet_name                        = "${module.naming.subnet.name_unique}-mongodb-private-endpoint"
-  observability_function_app_subnet_name     = "${module.naming.subnet.name_unique}-function-app"
-  observability_private_endpoint_subnet_name = "${module.naming.subnet.name_unique}-observability-private-endpoint"
-  observability_storage_account_subnet_name  = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint"
-  keyvault_private_endpoint_subnet_name      = "${module.naming.subnet.name_unique}-kv-private-endpoint"
+  # Subnet names
+  private_subnet_name                       = "${module.naming.subnet.name_unique}-mongodb-private-endpoint"
+  observability_function_app_subnet_name    = "${module.naming.subnet.name_unique}-function-app"
+  monitoring_ampls_subnet_name              = "${module.naming.subnet.name_unique}-monitoring-ampls"
+  observability_storage_account_subnet_name = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint"
+  keyvault_private_endpoint_subnet_name     = "${module.naming.subnet.name_unique}-kv-private-endpoint"
 
   tags = {
     environment = local.environment
@@ -36,11 +40,14 @@ locals {
   reference_minute_of_hour = 45
   restore_window_days      = 4
 
-  mongo_atlas_client_id     = var.mongo_atlas_client_id
-  mongo_atlas_client_secret = var.mongo_atlas_client_secret
-  # Keyvault
-  now                                  = timestamp()
-  mongo_atlas_client_secret_expiration = timeadd(local.now, "8760h")
+  mongo_atlas_client_id                = var.mongo_atlas_client_id
+  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
+  mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
+
+  # Log Analytics Workspace configuration
+  log_analytics_workspace_sku                        = "PerGB2018"
+  log_analytics_workspace_retention_in_days          = 30
+  log_analytics_workspace_internet_ingestion_enabled = false
 }

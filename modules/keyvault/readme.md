@@ -28,11 +28,12 @@ module "keyvault" {
   admin_object_id                      = data.azurerm_client_config.current.object_id
   mongo_atlas_client_secret            = var.mongo_atlas_client_secret
   mongo_atlas_client_secret_expiration = "2026-01-01T00:00:00Z"
-  virtual_network_subnet_ids           = [azurerm_subnet.function_app.id]
   private_endpoint_subnet_id           = azurerm_subnet.private_endpoints.id
   private_endpoint_name                = "pe-keyvault"
   private_service_connection_name      = "psc-keyvault"
   open_access                          = false
+  vnet_id                              = "<vnet-id>"
+  vnet_name                            = "<vnet-name>"
   # Optionally override purge protection or soft delete for non-prod:
   # purge_protection_enabled           = false
   # soft_delete_retention_days         = 7
@@ -89,7 +90,8 @@ module "keyvault" {
 | `private_endpoint_name` | Name for the private endpoint | `string` | - | Yes |
 | `private_service_connection_name` | Name for the private service connection | `string` | - | Yes |
 | `open_access` | Allow open access during bootstrap? true=Allow, false=Deny for SFI | `bool` | `false` | No |
-| `virtual_network_subnet_ids` | List of subnet IDs permitted access to the Key Vault | `list(string)` | `[]` | No |
+| `vnet_id` | ID of the Virtual Network to link the Private DNS Zone | `string` | - | yes |
+| `vnet_name` | Name of the Virtual Network | `string` | - | yes |
 | `purge_protection_enabled` | Enable purge protection for Key Vault? | `bool` | `true` | No |
 | `soft_delete_retention_days` | Days for soft delete retention (7-90) | `number` | `7` | No |
 
@@ -107,7 +109,6 @@ The module supports two network access modes via the `open_access` variable:
 ### Restricted Access (Production - Recommended)
 When `open_access = false` (default):
 - Network ACL default action is set to **Deny**
-- Only specified subnets in `virtual_network_subnet_ids` can access the Key Vault
 - Azure Services can bypass restrictions
 - Ideal for production environments following zero-trust principles
 
