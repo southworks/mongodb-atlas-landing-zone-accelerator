@@ -42,6 +42,7 @@ module "observability" {
   function_frequency_cron       = "<cron-expression>"
   mongodb_included_metrics      = "<comma-separated-metrics>"
   mongodb_excluded_metrics      = "<comma-separated-metrics>"
+  open_access                      = <true|false>
 }
 ```
 
@@ -72,6 +73,7 @@ module "observability" {
 | function_frequency_cron       | Cron expression for function frequency                                       | string | no      |
 | mongodb_included_metrics      | Comma-separated metrics to include for MongoDB monitoring                    | string | no       |
 | mongodb_excluded_metrics      | Comma-separated metrics to exclude for MongoDB monitoring                    | string | no       |
+| open_access      |  Azure Function's public network access enabled during bootstrap? true=Yes, false=No for SFI                    | bool | no       |
 
 ## Outputs
 
@@ -86,3 +88,19 @@ module "observability" {
 - Blob retention policy is set for 7 days.
 - All containers are private by default.
 - Function App uses system-assigned managed identity and runs in a secure subnet.
+
+## Network Access Configuration
+
+The module supports two network access modes via the `open_access` variable:
+
+### Restricted Access (Production - Recommended)
+When `open_access = false` (default):
+- `public_network_access_enabled` is set to **false**
+- Ideal for production environments following zero-trust principles
+
+### Open Access (Development/Testing)
+When `open_access = true`:
+- `public_network_access_enabled` is set to **true**
+- Public access is permitted, so users can deploy the Azure Functions code
+- Useful during initial setup or development
+- **Not recommended for production**

@@ -6,14 +6,14 @@ locals {
   // Note: Ensure that these addresses do not conflict with existing subnet addresses and that
   // they are part of the same step 1 VNet.
   region_addresses = {
-    eastus = {
-      app_subnet = ["10.0.0.32/29"]
-    }
     eastus2 = {
-      app_subnet = ["10.0.0.72/29"]
+      app_subnet = ["10.0.0.64/29"]
     }
-    westus = {
-      app_subnet = ["10.0.0.88/29"]
+    centralus = {
+      app_subnet = ["10.0.0.136/29"]
+    }
+    canadacentral = {
+      app_subnet = ["10.0.0.152/29"]
     }
   }
 
