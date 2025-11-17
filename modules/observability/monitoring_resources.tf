@@ -111,6 +111,7 @@ resource "azurerm_private_endpoint" "appinsights_pe" {
     azurerm_private_dns_zone.ods,
     azurerm_private_dns_zone.monitor,
     azurerm_private_dns_zone.agentsvc,
-    azurerm_private_dns_zone.privatedns_blob
+    azurerm_private_dns_zone.privatedns_blob,
+    azurerm_monitor_private_link_scoped_service.appinsights_assoc
   ]
 }

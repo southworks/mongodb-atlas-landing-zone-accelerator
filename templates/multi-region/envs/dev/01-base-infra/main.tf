@@ -143,7 +143,10 @@ module "observability" {
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
 
-  depends_on = [module.network]
+  depends_on = [
+    module.network,
+    module.vnet_peerings
+  ]
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {

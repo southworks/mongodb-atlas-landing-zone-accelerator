@@ -32,6 +32,8 @@ module "keyvault" {
   private_endpoint_name                = "pe-keyvault"
   private_service_connection_name      = "psc-keyvault"
   open_access                          = false
+  vnet_id                              = "<vnet-id>"
+  vnet_name                            = "<vnet-name>"
   # Optionally override purge protection or soft delete for non-prod:
   # purge_protection_enabled           = false
   # soft_delete_retention_days         = 7
@@ -88,6 +90,8 @@ module "keyvault" {
 | `private_endpoint_name` | Name for the private endpoint | `string` | - | Yes |
 | `private_service_connection_name` | Name for the private service connection | `string` | - | Yes |
 | `open_access` | Allow open access during bootstrap? true=Allow, false=Deny for SFI | `bool` | `false` | No |
+| `vnet_id` | ID of the Virtual Network to link the Private DNS Zone | `string` | - | yes |
+| `vnet_name` | Name of the Virtual Network | `string` | - | yes |
 | `purge_protection_enabled` | Enable purge protection for Key Vault? | `bool` | `true` | No |
 | `soft_delete_retention_days` | Days for soft delete retention (7-90) | `number` | `7` | No |
 

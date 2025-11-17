@@ -126,6 +126,10 @@ module "observability" {
   storage_account_pe_subnet_id     = module.network.subnet_ids["observability_storage_account"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
+
+  depends_on = [
+    module.network
+  ]
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {

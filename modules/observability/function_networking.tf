@@ -1,4 +1,4 @@
-##Blob EndPoint
+#Blob EndPoint
 resource "azurerm_private_endpoint" "storage_blob" {
   name                          = "pep-${var.pe_name}-blob"
   location                      = var.location
@@ -18,7 +18,7 @@ resource "azurerm_private_endpoint" "storage_blob" {
   }
 }
 
-##Queue EndPoint
+#Queue EndPoint
 resource "azurerm_private_endpoint" "storage_queue" {
   name                          = "pep-${var.pe_name}-queue"
   location                      = var.location
@@ -38,7 +38,7 @@ resource "azurerm_private_endpoint" "storage_queue" {
   }
 }
 
-##Table EndPoint
+#Table EndPoint
 resource "azurerm_private_endpoint" "storage_table" {
   name                          = "pep-${var.pe_name}-table"
   location                      = var.location
@@ -58,7 +58,7 @@ resource "azurerm_private_endpoint" "storage_table" {
   }
 }
 
-##File EndPoint
+#File EndPoint
 resource "azurerm_private_endpoint" "storage_file" {
   name                          = "pep-${var.pe_name}-file"
   location                      = var.location
@@ -79,7 +79,7 @@ resource "azurerm_private_endpoint" "storage_file" {
 }
 
 ##DNS##
-##Storage Account BLOB DNS
+#Storage Account BLOB DNS
 resource "azurerm_private_dns_zone" "privatedns_blob" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = var.resource_group_name
@@ -92,7 +92,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "linktovnet_blob" {
   virtual_network_id    = var.vnet_id
 }
 
-##Storage Account TABLE DNS
+#Storage Account TABLE DNS
 resource "azurerm_private_dns_zone" "privatedns_table" {
   name                = "privatelink.table.core.windows.net"
   resource_group_name = var.resource_group_name
@@ -104,7 +104,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "linktovnet_table" {
   virtual_network_id    = var.vnet_id
 }
 
-##Storage Account QUEUE DNS
+#Storage Account QUEUE DNS
 resource "azurerm_private_dns_zone" "privatedns_queue" {
   name                = "privatelink.queue.core.windows.net"
   resource_group_name = var.resource_group_name
@@ -117,7 +117,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "linktovnet_queue" {
   virtual_network_id    = var.vnet_id
 }
 
-##Storage Account FILE DNS
+#Storage Account FILE DNS
 resource "azurerm_private_dns_zone" "privatedns_file" {
   name                = "privatelink.file.core.windows.net"
   resource_group_name = var.resource_group_name

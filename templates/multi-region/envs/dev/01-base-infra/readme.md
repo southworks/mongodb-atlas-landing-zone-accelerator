@@ -95,6 +95,9 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 - **open_access**: Controls Key Vault and Azure Function network access. Default is `false`.
   - On the **first run** (resource creation and initial secret injection), set to `true` to allow public access and enable the creation and population of Key Vault secrets and Azure Function's code deployment.
   - On the **second and all successive runs**, set to `false` (recommended for production) so that Key Vault and the Azure Function restricts access to the specified subnet (Function App subnet).
+      
+    In production, you should never expose this Key Vault publicly, run your deployment from a build agent that has private networking access to your workload's resources.
+
 - **mongo_atlas_client_secret_expiration**: Expiration date for the MongoDB Atlas client secret stored in Key Vault, default is `2026-01-01T00:00:00Z`.
 
 ### Region Definitions
