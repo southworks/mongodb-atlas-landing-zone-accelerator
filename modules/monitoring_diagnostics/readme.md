@@ -32,10 +32,6 @@ module "monitoring_diagnostics" {
     core = module.keyvault.key_vault_id
   }
 
-  diagnostic_application_insights_ids = {
-    observability = module.observability.application_insights_id
-  }
-
   diagnostic_storage_blob_service_ids = {
     observability = module.observability.storage_blob_service_id
   }
@@ -63,7 +59,6 @@ module "monitoring_diagnostics" {
 | `diagnostic_setting_name_prefix` | Base name applied to diagnostic settings | `string` | `null` | No |
 | `diagnostic_function_app_ids` | Map of friendly keys to Function App IDs | `map(string)` | `{}` | No |
 | `diagnostic_key_vault_ids` | Map of friendly keys to Key Vault IDs | `map(string)` | `{}` | No |
-| `diagnostic_application_insights_ids` | Map of friendly keys to Application Insights IDs | `map(string)` | `{}` | No |
 | `diagnostic_storage_blob_service_ids` | Map of friendly keys to Storage Account Blob Service IDs | `map(string)` | `{}` | No |
 | `diagnostic_storage_queue_service_ids` | Map of friendly keys to Storage Account Queue Service IDs | `map(string)` | `{}` | No |
 | `diagnostic_storage_table_service_ids` | Map of friendly keys to Storage Account Table Service IDs | `map(string)` | `{}` | No |

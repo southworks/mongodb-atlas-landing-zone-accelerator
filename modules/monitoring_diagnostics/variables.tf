@@ -26,12 +26,6 @@ variable "diagnostic_key_vault_ids" {
   default     = {}
 }
 
-variable "diagnostic_application_insights_ids" {
-  description = "Map of friendly keys to Application Insights resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
 variable "diagnostic_storage_blob_service_ids" {
   description = "Map of friendly keys to Storage Account Blob Service resource IDs requiring diagnostics."
   type        = map(string)
