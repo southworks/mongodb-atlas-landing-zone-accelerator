@@ -11,11 +11,6 @@ locals {
     lower(replace(key, "_", "-")) => id
   }
 
-  diagnostic_virtual_network_targets = {
-    for key, id in var.diagnostic_virtual_network_ids :
-    key => id
-  }
-
   diagnostic_application_insights_targets = {
     for key, id in var.diagnostic_application_insights_ids :
     lower(replace(key, "_", "-")) => id
@@ -81,25 +76,6 @@ resource "azurerm_monitor_diagnostic_setting" "key_vaults" {
 
   dynamic "enabled_log" {
     for_each = toset(try(data.azurerm_monitor_diagnostic_categories.key_vaults[each.key].log_category_types, []))
-    content {
-      category = enabled_log.value
-    }
-  }
-}
-
-data "azurerm_monitor_diagnostic_categories" "virtual_networks" {
-  for_each    = local.diagnostic_virtual_network_targets
-  resource_id = each.value
-}
-
-resource "azurerm_monitor_diagnostic_setting" "virtual_networks" {
-  for_each                   = local.diagnostic_virtual_network_targets
-  name                       = lower("${local.diagnostic_setting_name_prefix}-${each.key}")
-  target_resource_id         = each.value
-  log_analytics_workspace_id = var.workspace_ids_by_location[each.key]
-
-  dynamic "enabled_log" {
-    for_each = toset(try(data.azurerm_monitor_diagnostic_categories.virtual_networks[each.key].log_category_types, []))
     content {
       category = enabled_log.value
     }

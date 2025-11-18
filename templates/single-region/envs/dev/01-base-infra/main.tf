@@ -162,10 +162,6 @@ module "monitoring_diagnostics" {
     core = module.kv.key_vault_id
   }
 
-  diagnostic_virtual_network_ids = {
-    core = module.network.vnet_id
-  }
-
   diagnostic_application_insights_ids = {
     monitoring = module.monitoring.app_insights_id
   }

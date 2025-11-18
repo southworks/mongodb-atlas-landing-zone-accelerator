@@ -207,11 +207,6 @@ module "monitoring_diagnostics" {
 
   diagnostic_setting_name_prefix = module.naming.monitor_diagnostic_setting.name
 
-  # VNets will use regional LAW
-  diagnostic_virtual_network_ids = {
-    for region_key, network_module in module.network : region_key => network_module.vnet_id
-  }
-
   # Non-regional resources use zoneA LAW
   diagnostic_function_app_ids = {
     observability = module.observability.function_app_id
