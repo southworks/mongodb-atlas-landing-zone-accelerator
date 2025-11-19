@@ -37,7 +37,7 @@ locals {
   plan_name         = "Pay as You Go"
   term_unit         = "P1M"
 
-  # Note: The proposed address space is for demonstration purposes. Please updated them as needed.
+  # Note: The proposed address space is for demonstration purposes. Please update them as needed.
   region_definition = {
     "unique" = {
       atlas_region                                  = "US_CENTRAL"

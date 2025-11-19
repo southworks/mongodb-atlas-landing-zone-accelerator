@@ -52,7 +52,7 @@ locals {
     }
   }
 
-  # Note: The proposed address space is for demonstration purposes. Please updated them as needed.
+  # Note: The proposed address space is for demonstration purposes. Please update them as needed.
   # Disclaimer: The `node_count` must be either 3, 5, or 7. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/cluster.html?utm_source=chatgpt.com#electable_nodes-1
   region_definitions = {
     zoneA = {
