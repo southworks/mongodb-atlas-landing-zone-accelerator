@@ -22,12 +22,26 @@ output "atlas_privatelink_endpoint_ids" {
   value = module.mongodb_atlas_config.atlas_privatelink_endpoint_ids
 }
 
-output "vnet_names" {
-  value = { for k, m in module.network : k => m.vnet_name }
+output "vnets" {
+  value = {
+    for k, m in module.network :
+    k => {
+      name = m.vnet_name
+      resource_group_name = data.azurerm_resource_group.infrastructure_rgs[k].name
+    }
+  }
 }
 
 output "regions_values" {
-  value = { for k, m in local.regions : k => m }
+  value = {
+    for k, m in local.regions :
+    k => merge(
+      m,
+      {
+        resource_group_name = data.azurerm_resource_group.infrastructure_rgs[k].name
+      }
+    )
+  }
 }
 
 output "function_app_default_hostname" {

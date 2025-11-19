@@ -9,9 +9,9 @@ module "devops" {
   tags     = local.tags
 
   # Resource groups
-  resource_group_name_devops         = module.devops_naming.resource_group.name
-  resource_group_name_infrastructure = module.infrastructure_naming.resource_group.name
-  resource_group_name_app            = module.application_naming.resource_group.name
+  resource_group_name_devops     = module.devops_naming.resource_group.name
+  resource_groups_infrastructure = {"unique": {name = module.infrastructure_naming.resource_group.name, location = local.location}}
+  resource_groups_app            = {"unique": {name = module.application_naming.resource_group.name, location = local.location}}
 
   # Identity
   audiences  = local.audiences

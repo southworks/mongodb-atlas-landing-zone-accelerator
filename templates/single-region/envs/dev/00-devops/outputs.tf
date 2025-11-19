@@ -9,3 +9,7 @@ output "resource_group_names" {
     app            = module.devops.resource_group_names.app
   }
 }
+
+output "region_definition" {
+  value = local.region_definition
+}

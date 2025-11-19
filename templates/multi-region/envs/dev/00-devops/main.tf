@@ -9,9 +9,19 @@ module "devops" {
   tags     = local.tags
 
   # Resource groups
-  resource_group_name_devops         = module.devops_naming.resource_group.name
-  resource_group_name_infrastructure = module.infrastructure_naming.resource_group.name
-  resource_group_name_app            = module.application_naming.resource_group.name
+  resource_group_name_devops = module.devops_naming.resource_group.name
+  resource_groups_app = {for region_key, region in local.regions :
+    region_key => {
+      name = module.application_naming[region_key].resource_group.name
+      location = region.azure_region 
+    }
+  }
+  resource_groups_infrastructure = {for region_key, region in local.regions :
+    region_key => {
+      name = module.infrastructure_naming[region_key].resource_group.name
+      location = region.azure_region
+    }
+  }
 
   # Identity
   audiences  = local.audiences
