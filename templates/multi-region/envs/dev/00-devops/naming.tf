@@ -5,13 +5,17 @@ module "devops_naming" {
 }
 
 module "infrastructure_naming" {
+  for_each = local.regions
+
   source  = "Azure/naming/azurerm"
   version = "0.4.2"
-  suffix  = ["infra"]
+  suffix  = ["infra", each.key]
 }
 
 module "application_naming" {
+  for_each = local.regions
+
   source  = "Azure/naming/azurerm"
   version = "0.4.2"
-  suffix  = ["app"]
+  suffix  = ["app", each.key]
 }

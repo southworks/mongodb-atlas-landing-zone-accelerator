@@ -7,17 +7,20 @@ resource "azurerm_resource_group" "devops_rg" {
   tags     = var.tags
 }
 
-resource "azurerm_resource_group" "infrastructure_rg" {
-  name     = var.resource_group_name_infrastructure
-  location = var.location
-  tags     = var.tags
+resource "azurerm_resource_group" "infrastructure_rgs" {
+  for_each = var.resource_groups_infrastructure
+
+  name     = each.value.name
+  location = each.value.location
+  tags     = merge(var.tags, { location = each.value.location })
 }
 
-resource "azurerm_resource_group" "application_rg" {
-  count    = length(var.resource_group_name_app) > 0 ? 1 : 0
-  name     = var.resource_group_name_app
-  location = var.location
-  tags     = var.tags
+resource "azurerm_resource_group" "application_rgs" {
+  for_each = var.resource_groups_app
+
+  name     = each.value.name
+  location = each.value.location
+  tags     = merge(var.tags, { location = each.value.location })
 }
 
 resource "azurerm_storage_account" "sa" {

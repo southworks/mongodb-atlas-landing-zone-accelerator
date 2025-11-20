@@ -1,5 +1,8 @@
-output "vnet_name" {
-  value = module.network.vnet_name
+output "vnet" {
+  value = {
+    name                = module.network.vnet_name
+    resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
+  }
 }
 
 output "cluster_id" {

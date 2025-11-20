@@ -9,22 +9,22 @@ module "application" {
   # Network Configuration
   virtual_network_name     = local.virtual_network_name
   subnet_name              = local.subnet_name
-  address_prefixes         = local.address_prefixes
+  address_prefixes         = local.region_definition.app_subnet_prefixes
   vnet_resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
 
   # Web App Configuration
   app_web_app_name = local.app_web_app_name
 
   resource_group_name = data.azurerm_resource_group.app_rg.name
-  location            = local.location
+  location            = local.region_definition.azure_region
 
   tags = local.tags
 }
 
 data "azurerm_resource_group" "app_rg" {
-  name = data.terraform_remote_state.devops.outputs.resource_group_names.app
+  name = data.terraform_remote_state.devops.outputs.resource_group_names.app["unique"].name
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {
-  name = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
+  name = local.vnet_resource_group_name
 }

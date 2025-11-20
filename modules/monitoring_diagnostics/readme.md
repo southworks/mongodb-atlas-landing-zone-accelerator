@@ -6,7 +6,7 @@ This Terraform module standardizes Azure Monitor diagnostic settings across the 
 
 ## Features
 
-- **Consistent Diagnostic Coverage**: Automatically applies diagnostic settings to Function Apps, Key Vaults, Application Insights, Storage sub-services (Blob, Queue, Table, File), and supported network resources (virtual networks).
+- **Consistent Diagnostic Coverage**: Automatically applies diagnostic settings to Function Apps, Key Vaults, and Storage sub-services (Blob, Queue, Table, File).
 - **Centralized Log Collection**: Streams all diagnostic log categories to the shared Log Analytics workspace for cross-resource analysis.
 - **Flexible Resource Mapping**: Accepts maps of resource IDs so callers can opt into diagnostics per resource or per category.
 - **Predictable Naming**: Optional prefix support keeps diagnostic setting names aligned with your environment conventions.
@@ -15,6 +15,8 @@ This Terraform module standardizes Azure Monitor diagnostic settings across the 
 
 ## Usage
 
+### Example Deployment
+
 ```hcl
 module "monitoring_diagnostics" {
   source = "../../modules/monitoring_diagnostics"
@@ -22,14 +24,14 @@ module "monitoring_diagnostics" {
   workspace_id   = module.monitoring.workspace_id
   workspace_name = module.monitoring.workspace_name
 
-  diagnostic_setting_name_prefix = "law-myapp-dev"
+  diagnostic_setting_name_prefix = "diag"
 
   diagnostic_function_app_ids = {
     observability = module.observability.function_app_id
   }
 
   diagnostic_key_vault_ids = {
-    core = module.keyvault.key_vault_id
+    core = module.kv.key_vault_id
   }
 
   diagnostic_storage_blob_service_ids = {
@@ -85,7 +87,8 @@ This module uses the `azurerm_monitor_diagnostic_categories` data source to disc
 ### Resource-Specific Behavior
 - **App Service Plans**: Diagnostics are not configured as they only emit metrics (logs are not available, and metrics are excluded per requirements).
 - **Storage Sub-Services**: Separate diagnostic settings are created for blob, queue, table, and file services with prefixed naming (e.g., `-blob-`, `-queue-`, `-table-`, `-file-`).
-- **Subnets & Private Endpoints**: Omitted from diagnostic settings. See implementation comment in `main.tf` for details.
+- **Virtual Networks, Subnets & Private Endpoints**: Omitted from diagnostic settings. See implementation comment in `main.tf` for details.
+- **Application Insights**: Not included as it is already integrated with the Log Analytics workspace directly.
 
 ### Conditional Resource Creation
 Diagnostic settings are only created when a resource has available log categories. This prevents errors when attempting to configure diagnostics for resources that don't support them or only support metrics.

@@ -49,9 +49,3 @@ variable "diagnostic_storage_file_service_ids" {
   type        = map(string)
   default     = {}
 }
-
-variable "workspace_ids_by_location" {
-  description = "Map of Azure location to Log Analytics Workspace ID for regional routing. If provided, enables regional LAW routing for resources."
-  type        = map(string)
-  default     = null
-}

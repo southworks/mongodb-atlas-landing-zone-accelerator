@@ -48,9 +48,21 @@ variable "app_insights_name" {
   type        = string
 }
 
+variable "create_app_insights" {
+  description = "Whether to create the Application Insights resource (set false in secondary regions when no workloads need it)."
+  type        = bool
+  default     = true
+}
+
 variable "private_link_scope_name" {
   description = "Name for the Azure Monitor Private Link Scope"
   type        = string
+}
+
+variable "create_private_link_scope" {
+  description = "Whether to create the Azure Monitor Private Link Scope and associated private link resources."
+  type        = bool
+  default     = true
 }
 
 variable "vnet_id" {
@@ -90,13 +102,13 @@ variable "create_private_dns_zones" {
 }
 
 variable "private_dns_zone_ids" {
-  description = "Optional existing private DNS zone IDs to use instead of creating new ones. Map with keys: oms, ods, monitor, agentsvc. Required if create_private_dns_zones is false."
+  description = "Optional existing private DNS zone IDs to use instead of creating new ones. Map with keys: oms, ods, monitor, agentsvc, blob. Required if create_private_dns_zones is false."
   type        = map(string)
   default     = null
 }
 
 variable "enable_ampls_pe" {
-  description = "Whether to enable the Private Endpoint for the Azure Monitor Private Link Scope."
+  description = "Whether to enable the Private Endpoint for the Azure Monitor Private Link Scope (only used when create_private_link_scope is true)."
   type        = bool
   default     = false
 

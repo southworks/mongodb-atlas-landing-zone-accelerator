@@ -18,57 +18,10 @@ locals {
 
   naming_suffix_base = "inframulregion"
 
-  # Disclaimer: Ensure that the `instance_size` is consistent across all regions specified in `region_configs`. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/advanced_cluster#electable_specs-1
-  # Disclaimer: The `node_count` must be either 3, 5, or 7. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/cluster.html?utm_source=chatgpt.com#electable_nodes-1
-
-  region_definitions = {
-    zoneA = {
-      atlas_region                                  = "US_EAST_2"
-      azure_region                                  = "eastus2"
-      priority                                      = 7
-      address_space                                 = ["10.0.0.0/24"]
-      private_subnet_prefixes                       = ["10.0.0.0/28"]
-      observability_function_app_subnet_prefixes    = ["10.0.0.16/28"]
-      monitoring_ampls_subnet_prefixes              = ["10.0.0.32/27"]
-      observability_storage_account_subnet_prefixes = ["10.0.0.64/27"]
-      keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.96/27"]
-      private_subnet_name                           = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus2"
-      observability_function_app_subnet_name        = "${module.naming.subnet.name_unique}-function-app-eastus2"
-      monitoring_ampls_subnet_name                  = "${module.naming.subnet.name_unique}-monitoring-ampls-eastus2"
-      keyvault_private_endpoint_subnet_name         = "${module.naming.subnet.name_unique}-kv-private-endpoint-eastus2"
-      observability_storage_account_subnet_name     = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint-eastus2"
-      deploy_observability_subnets                  = true
-      has_keyvault_private_endpoint                 = true
-      has_observability_storage_account             = true
-      node_count                                    = 2
-    }
-    zoneB = {
-      atlas_region                      = "US_CENTRAL"
-      azure_region                      = "centralus"
-      priority                          = 6
-      address_space                     = ["10.0.1.0/27"]
-      private_subnet_prefixes           = ["10.0.1.0/28"]
-      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-centralus"
-      deploy_observability_subnets      = false
-      has_keyvault_private_endpoint     = false
-      has_observability_storage_account = false
-      node_count                        = 2
-    }
-    zoneC = {
-      atlas_region                      = "CANADA_CENTRAL"
-      azure_region                      = "canadacentral"
-      priority                          = 5
-      address_space                     = ["10.0.1.32/27"]
-      private_subnet_prefixes           = ["10.0.1.32/28"]
-      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-canadacentral"
-      deploy_observability_subnets      = false
-      has_keyvault_private_endpoint     = false
-      has_observability_storage_account = false
-      node_count                        = 1
-    }
-  }
+  region_definitions = data.terraform_remote_state.devops.outputs.region_definitions
 
   # For Atlas cluster
+  # Disclaimer: Ensure that the `instance_size` is consistent across all regions specified in `region_configs`. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/advanced_cluster#electable_specs-1
   region_configs = {
     for k, v in local.region_definitions : k => {
       atlas_region = v.atlas_region
