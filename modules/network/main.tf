@@ -93,7 +93,7 @@ resource "azurerm_network_security_group" "nsg" {
     destination_address_prefix = "Internet"
     source_port_range          = "*"
     destination_port_range     = "443"
-    description                = "Allow outbound TCP traffic to the Internet on port 443 for secure API calls (e.g., MongoDB Atlas Metris API)."
+    description                = "Allow outbound TCP traffic to the Internet on port 443 for secure API calls (e.g., MongoDB Atlas Metrics API)."
   }
 
   # Deny all other outbound traffic not explicitly allowed above
