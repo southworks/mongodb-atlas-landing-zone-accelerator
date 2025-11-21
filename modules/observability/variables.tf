@@ -9,10 +9,7 @@ variable "location" {
   type        = string
 }
 
-variable "log_analytics_workspace_id" {
-  description = "ID of the central Log Analytics workspace for diagnostic settings"
-}
-  variable "network_interface_name" {
+variable "network_interface_name" {
   description = "General name for the Network Interface."
   type        = string
 }
@@ -105,4 +102,21 @@ variable "open_access" {
   description = "Allow open access during bootstrap? true=Allow, false=Deny for SFI"
   type        = bool
   default     = false
+}
+
+variable "create_blob_private_dns_zone" {
+  description = "Whether to create the privatelink.blob.core.windows.net DNS zone inside this module."
+  type        = bool
+  default     = true
+}
+
+variable "blob_private_dns_zone_id" {
+  description = "Existing privatelink.blob.core.windows.net DNS zone ID to reuse when create_blob_private_dns_zone is false."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.create_blob_private_dns_zone || var.blob_private_dns_zone_id != null
+    error_message = "Provide blob_private_dns_zone_id when reusing an existing blob private DNS zone."
+  }
 }

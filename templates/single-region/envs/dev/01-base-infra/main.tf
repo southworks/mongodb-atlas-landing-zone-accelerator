@@ -6,9 +6,9 @@ module "mongodb_atlas_config" {
   cluster_type             = local.cluster_type
   instance_size            = local.instance_size
   backup_enabled           = local.backup_enabled
-  region                   = local.region
+  region                   = local.region_definition.atlas_region
   electable_nodes          = local.electable_nodes
-  priority                 = local.priority
+  priority                 = local.region_definition.priority
   project_name             = local.project_name
   reference_hour_of_day    = local.reference_hour_of_day
   reference_minute_of_hour = local.reference_minute_of_hour
@@ -21,21 +21,21 @@ module "mongodb_atlas_config" {
 
 module "network" {
   source              = "../../../../../modules/network"
-  location            = local.location
+  location            = local.region_definition.azure_region
   resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
   vnet_name           = module.naming.virtual_network.name
-  address_space       = local.vnet_address_space
+  address_space       = local.region_definition.vnet_address_space
   nsg_name            = module.naming.network_security_group.name_unique
   tags                = local.tags
 
   subnets = {
     private = {
-      name             = local.private_subnet_name
-      address_prefixes = local.private_subnet_prefixes
+      name             = local.region_definition.private_subnet_name
+      address_prefixes = local.region_definition.private_subnet_prefixes
     }
     observability_function_app = {
-      name             = local.observability_function_app_subnet_name
-      address_prefixes = local.observability_function_app_subnet_prefixes
+      name             = local.region_definition.observability_function_app_subnet_name
+      address_prefixes = local.region_definition.observability_function_app_subnet_prefixes
       delegation = {
         name = "functionapp-delegation"
         service_delegation = {
@@ -45,20 +45,19 @@ module "network" {
       }
     }
     monitoring_ampls = {
-      name             = local.monitoring_ampls_subnet_name
-      address_prefixes = local.monitoring_ampls_subnet_prefixes
+      name             = local.region_definition.monitoring_ampls_subnet_name
+      address_prefixes = local.region_definition.monitoring_ampls_subnet_prefixes
     }
     observability_storage_account = {
-      name             = local.observability_storage_account_subnet_name
-      address_prefixes = local.observability_storage_account_subnet_prefixes
+      name             = local.region_definition.observability_storage_account_subnet_name
+      address_prefixes = local.region_definition.observability_storage_account_subnet_prefixes
     }
     keyvault_private_endpoint = {
-      name              = local.keyvault_private_endpoint_subnet_name
-      address_prefixes  = local.keyvault_private_endpoint_subnet_prefixes
+      name              = local.region_definition.keyvault_private_endpoint_subnet_name
+      address_prefixes  = local.region_definition.keyvault_private_endpoint_subnet_prefixes
       service_endpoints = ["Microsoft.KeyVault"]
     }
   }
-
 
   private_endpoints = {
     mongodb = {
@@ -84,7 +83,7 @@ module "network" {
 module "monitoring" {
   source                          = "../../../../../modules/monitoring"
   workspace_name                  = module.naming.log_analytics_workspace.name_unique
-  location                        = local.location
+  location                        = local.region_definition.azure_region
   resource_group_name             = data.azurerm_resource_group.infrastructure_rg.name
   sku                             = local.log_analytics_workspace_sku
   retention_in_days               = local.log_analytics_workspace_retention_in_days
@@ -99,12 +98,16 @@ module "monitoring" {
   network_interface_name          = module.naming.network_interface.name_unique
   private_service_connection_name = module.naming.private_service_connection.name_unique
   tags                            = local.tags
+  enable_ampls_pe                 = true
+  create_private_link_scope       = true
+  create_app_insights             = true
+  create_private_dns_zones        = true
 }
 
 module "kv" {
   source                               = "../../../../../modules/keyvault"
   resource_group_name                  = data.azurerm_resource_group.infrastructure_rg.name
-  location                             = local.location
+  location                             = local.region_definition.azure_region
   key_vault_name                       = module.naming.key_vault.name_unique
   tenant_id                            = data.azurerm_client_config.current.tenant_id
   mongo_atlas_client_secret            = local.mongo_atlas_client_secret
@@ -123,8 +126,7 @@ module "kv" {
 module "observability" {
   source                           = "../../../../../modules/observability"
   resource_group_name              = data.azurerm_resource_group.infrastructure_rg.name
-  location                         = local.location
-  log_analytics_workspace_id       = module.monitoring.workspace_id
+  location                         = local.region_definition.azure_region
   app_insights_connection_string   = module.monitoring.app_insights_connection_string
   function_app_name                = module.naming.function_app.name_unique
   service_plan_name                = module.naming.app_service_plan.name_unique
@@ -142,6 +144,8 @@ module "observability" {
   storage_account_pe_subnet_id     = module.network.subnet_ids["observability_storage_account"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
+  blob_private_dns_zone_id         = module.monitoring.private_dns_zone_ids["blob"]
+  create_blob_private_dns_zone     = false
 
   depends_on = [module.monitoring, module.network]
 }
@@ -186,12 +190,11 @@ module "monitoring_diagnostics" {
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {
-  name = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
+  name = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure["unique"].name
 }
 
-resource "azurerm_key_vault_access_policy" "function_app_kv_policy" {
-  key_vault_id       = module.kv.key_vault_id
-  tenant_id          = data.azurerm_client_config.current.tenant_id
-  object_id          = module.observability.function_app_identity_principal_id
-  secret_permissions = ["Get", "List"]
+resource "azurerm_role_assignment" "function_app_kv_rbac" {
+  scope                = module.kv.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.observability.function_app_identity_principal_id
 }

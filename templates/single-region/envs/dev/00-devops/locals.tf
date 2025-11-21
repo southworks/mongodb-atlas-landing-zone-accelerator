@@ -1,6 +1,6 @@
 locals {
   # Common
-  location = "eastus2"
+  location = "centralus"
 
   # Storage Account
   account_tier     = "Standard"
@@ -20,6 +20,7 @@ locals {
     federated_identity_name = "${lower(local.github_organization_name)}-${lower(local.github_repository_name)}-env-${lower(local.environment)}",
     subject                 = "repo:${local.github_organization_name}/${local.github_repository_name}:environment:${local.environment}"
   }
+
   tags = {
     environment = local.environment
     location    = local.location
@@ -35,4 +36,25 @@ locals {
   term_id           = "gmz7xq9ge3py"
   plan_name         = "Pay as You Go"
   term_unit         = "P1M"
+
+  # Note: The proposed address space is for demonstration purposes. Please update them as needed.
+  region_definition = {
+    "unique" = {
+      atlas_region                                  = "US_CENTRAL"
+      azure_region                                  = "centralus"
+      priority                                      = 7
+      vnet_address_space                            = ["10.0.0.0/24"]
+      private_subnet_prefixes                       = ["10.0.0.0/28"]
+      observability_function_app_subnet_prefixes    = ["10.0.0.16/28"]
+      keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.32/27"]
+      monitoring_ampls_subnet_prefixes              = ["10.0.0.64/27"]
+      observability_storage_account_subnet_prefixes = ["10.0.0.96/27"]
+      app_subnet_prefixes                           = ["10.0.0.128/28"]
+      private_subnet_name                           = "${module.infrastructure_naming.subnet.name_unique}-mongodb-private-endpoint"
+      observability_function_app_subnet_name        = "${module.infrastructure_naming.subnet.name_unique}-function-app"
+      monitoring_ampls_subnet_name                  = "${module.infrastructure_naming.subnet.name_unique}-monitoring-ampls"
+      observability_storage_account_subnet_name     = "${module.infrastructure_naming.subnet.name_unique}-observability-sa-private-endpoint"
+      keyvault_private_endpoint_subnet_name         = "${module.infrastructure_naming.subnet.name_unique}-kv-private-endpoint"
+    }
+  }
 }

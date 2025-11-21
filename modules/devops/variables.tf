@@ -7,16 +7,22 @@ variable "resource_group_name_devops" {
   type        = string
   description = "The name of the DevOps resource group"
 }
-
-variable "resource_group_name_app" {
-  type        = string
-  default     = ""
-  description = "(Optional) The name of the application resource group. If not provided, the application resource group will not be created."
+variable "resource_groups_app" {
+  type = map(object({
+    name     = string
+    location = string
+  }))
+  default     = {}
+  description = "(Optional) Map of application resource groups with their locations. Key is the region identifier (e.g., 'zoneA', 'zoneB', 'zoneC')."
 }
 
-variable "resource_group_name_infrastructure" {
-  type        = string
-  description = "The name of the infrastructure resource group"
+variable "resource_groups_infrastructure" {
+  type = map(object({
+    name     = string
+    location = string
+  }))
+  default     = {}
+  description = "(Optional) Map of infrastructure resource groups with their locations. Key is the region identifier (e.g., 'zoneA', 'zoneB', 'zoneC')."
 }
 
 variable "location" {

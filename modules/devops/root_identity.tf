@@ -13,33 +13,47 @@ resource "azurerm_federated_identity_credential" "federated_identity" {
   parent_id           = azurerm_user_assigned_identity.identity.id
 }
 
-locals {
-  permissions_to_create = [
-    azurerm_resource_group.devops_rg,
-    azurerm_resource_group.infrastructure_rg
-  ]
+resource "azurerm_role_assignment" "devops_permission_contributor" {
+  scope                = azurerm_resource_group.devops_rg.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.identity.principal_id
 }
 
-resource "azurerm_role_assignment" "permissions_admin" {
-  for_each = { for rg in local.permissions_to_create : rg.name => rg }
+resource "azurerm_role_assignment" "infrastructure_permission_contributor" {
+  for_each = var.resource_groups_infrastructure
 
-  scope                = each.value.id
+  scope                = azurerm_resource_group.infrastructure_rgs[each.key].id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.identity.principal_id
+}
+
+resource "azurerm_role_assignment" "app_permission_contributor" {
+  for_each = var.resource_groups_app
+
+  scope                = azurerm_resource_group.application_rgs[each.key].id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.identity.principal_id
+}
+
+resource "azurerm_role_assignment" "devops_permission_user_access_administrator" {
+  scope                = azurerm_resource_group.devops_rg.id
   role_definition_name = "User Access Administrator"
   principal_id         = azurerm_user_assigned_identity.identity.principal_id
 }
 
-resource "azurerm_role_assignment" "permissions_contributor" {
-  for_each = { for rg in local.permissions_to_create : rg.name => rg }
+resource "azurerm_role_assignment" "infrastructure_permission_user_access_administrator" {
+  for_each = var.resource_groups_infrastructure
 
-  scope                = each.value.id
-  role_definition_name = "Contributor"
+  scope                = azurerm_resource_group.infrastructure_rgs[each.key].id
+  role_definition_name = "User Access Administrator"
   principal_id         = azurerm_user_assigned_identity.identity.principal_id
 }
-resource "azurerm_role_assignment" "optional_permission" {
-  count = length(var.resource_group_name_app) > 0 ? 1 : 0
 
-  scope                = azurerm_resource_group.application_rg[0].id
-  role_definition_name = "Contributor"
+resource "azurerm_role_assignment" "app_permission_user_access_administrator" {
+  for_each = var.resource_groups_app
+
+  scope                = azurerm_resource_group.application_rgs[each.key].id
+  role_definition_name = "User Access Administrator"
   principal_id         = azurerm_user_assigned_identity.identity.principal_id
 }
 

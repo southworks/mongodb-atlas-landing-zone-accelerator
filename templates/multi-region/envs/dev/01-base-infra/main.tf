@@ -1,4 +1,5 @@
 data "azurerm_client_config" "current" {}
+
 module "mongodb_atlas_config" {
   source                   = "../../../../../modules/atlas_config_multi_region"
   org_id                   = local.org_id
@@ -19,7 +20,7 @@ module "network" {
   for_each            = local.regions
   source              = "../../../../../modules/network"
   location            = each.value.location
-  resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
+  resource_group_name = data.azurerm_resource_group.infrastructure_rgs[each.key].name
   vnet_name           = "${module.naming.virtual_network.name_unique}-${each.key}"
   nsg_name            = "${module.naming.network_security_group.name_unique}-${each.key}"
   address_space       = each.value.address_space
@@ -84,8 +85,8 @@ module "vnet_peerings" {
   name_this_to_peer = "${each.value.a}-to-${each.value.b}"
   name_peer_to_this = "${each.value.b}-to-${each.value.a}"
 
-  resource_group_name_this = data.azurerm_resource_group.infrastructure_rg.name
-  resource_group_name_peer = data.azurerm_resource_group.infrastructure_rg.name
+  resource_group_name_this = data.azurerm_resource_group.infrastructure_rgs[each.value.a].name
+  resource_group_name_peer = data.azurerm_resource_group.infrastructure_rgs[each.value.b].name
 
   vnet_name_this = module.network[each.value.a].vnet_name
   vnet_name_peer = module.network[each.value.b].vnet_name
@@ -103,20 +104,22 @@ module "monitoring" {
   source   = "../../../../../modules/monitoring"
 
   # Unique names per region
-  workspace_name          = "${module.naming.log_analytics_workspace.name_unique}-${each.key}"
-  app_insights_name       = "${module.naming.application_insights.name_unique}-${each.key}"
-  private_link_scope_name = "ampls-${module.naming.log_analytics_workspace.name_unique}-${each.key}"
+  workspace_name            = "${module.naming.log_analytics_workspace.name_unique}-${each.key}"
+  app_insights_name         = "${module.naming.application_insights.name_unique}-${each.key}"
+  private_link_scope_name   = "ampls-${module.naming.log_analytics_workspace.name_unique}-${each.key}"
+  create_app_insights       = each.key == "zoneA"
+  create_private_link_scope = each.key == "zoneA"
 
   # Regional configuration
   location            = each.value.location
-  resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
+  resource_group_name = data.azurerm_resource_group.infrastructure_rgs[each.key].name
 
   # VNet configuration (required for DNS zone links)
   vnet_id   = module.network[each.key].vnet_id
   vnet_name = module.network[each.key].vnet_name
 
   # AMPLS PE configuration (only for zones with monitoring subnets)
-  enable_ampls_pe    = each.value.deploy_observability_subnets
+  enable_ampls_pe    = each.key == "zoneA" && each.value.deploy_observability_subnets
   ampls_pe_subnet_id = each.value.deploy_observability_subnets ? module.network[each.key].subnet_ids["monitoring_ampls"] : null
 
   # DNS zones: Create in first region (zoneA), reuse in others
@@ -141,7 +144,7 @@ module "monitoring" {
 
 module "kv" {
   source                               = "../../../../../modules/keyvault"
-  resource_group_name                  = data.azurerm_resource_group.infrastructure_rg.name
+  resource_group_name                  = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
   location                             = local.regions["zoneA"].location
   key_vault_name                       = module.naming.key_vault.name_unique
   tenant_id                            = data.azurerm_client_config.current.tenant_id
@@ -160,9 +163,8 @@ module "kv" {
 
 module "observability" {
   source                           = "../../../../../modules/observability"
-  resource_group_name              = data.azurerm_resource_group.infrastructure_rg.name
+  resource_group_name              = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
   location                         = local.regions["zoneA"].location
-  log_analytics_workspace_id       = module.monitoring["zoneA"].workspace_id
   app_insights_connection_string   = module.monitoring["zoneA"].app_insights_connection_string
   function_app_name                = module.naming.function_app.name_unique
   service_plan_name                = module.naming.app_service_plan.name_unique
@@ -180,6 +182,8 @@ module "observability" {
   storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["observability_storage_account"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
+  blob_private_dns_zone_id         = module.monitoring["zoneA"].private_dns_zone_ids["blob"]
+  create_blob_private_dns_zone     = false
 
   depends_on = [
     module.network,
@@ -188,26 +192,20 @@ module "observability" {
   ]
 }
 
-data "azurerm_resource_group" "infrastructure_rg" {
-  name = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
+data "azurerm_resource_group" "infrastructure_rgs" {
+  for_each = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
+  name     = each.value.name
 }
 
 # Diagnostic settings for all Azure resources
 module "monitoring_diagnostics" {
   source = "../../../../../modules/monitoring_diagnostics"
 
-  # Default to zoneA workspace for non-regional resources
   workspace_id   = module.monitoring["zoneA"].workspace_id
   workspace_name = module.monitoring["zoneA"].workspace_name
 
-  # Regional routing configuration
-  workspace_ids_by_location = {
-    for k, v in local.regions : k => module.monitoring[k].workspace_id
-  }
-
   diagnostic_setting_name_prefix = module.naming.monitor_diagnostic_setting.name
 
-  # Non-regional resources use zoneA LAW
   diagnostic_function_app_ids = {
     observability = module.observability.function_app_id
   }
@@ -239,9 +237,8 @@ module "monitoring_diagnostics" {
   ]
 }
 
-resource "azurerm_key_vault_access_policy" "function_app_kv_policy" {
-  key_vault_id       = module.kv.key_vault_id
-  tenant_id          = data.azurerm_client_config.current.tenant_id
-  object_id          = module.observability.function_app_identity_principal_id
-  secret_permissions = ["Get", "List"]
+resource "azurerm_role_assignment" "function_app_kv_rbac" {
+  scope                = module.kv.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.observability.function_app_identity_principal_id
 }

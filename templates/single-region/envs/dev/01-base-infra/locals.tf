@@ -1,25 +1,7 @@
 locals {
-  location    = "eastus2"
   environment = "dev"
 
   project_name = var.project_name
-
-  vnet_address_space = ["10.0.0.0/24"]
-
-  # Subnet CIDR blocks
-  # Layout: 10.0.0.0/25 provides 128 IPs (0-127)
-  private_subnet_prefixes                       = ["10.0.0.0/28"]
-  observability_function_app_subnet_prefixes    = ["10.0.0.16/28"]
-  keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.32/27"]
-  monitoring_ampls_subnet_prefixes              = ["10.0.0.64/27"]
-  observability_storage_account_subnet_prefixes = ["10.0.0.96/27"]
-
-  # Subnet names
-  private_subnet_name                       = "${module.naming.subnet.name_unique}-mongodb-private-endpoint"
-  observability_function_app_subnet_name    = "${module.naming.subnet.name_unique}-function-app"
-  monitoring_ampls_subnet_name              = "${module.naming.subnet.name_unique}-monitoring-ampls"
-  observability_storage_account_subnet_name = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint"
-  keyvault_private_endpoint_subnet_name     = "${module.naming.subnet.name_unique}-kv-private-endpoint"
 
   tags = {
     environment = local.environment
@@ -31,13 +13,13 @@ locals {
   cluster_type             = "REPLICASET"
   instance_size            = "M10"
   backup_enabled           = true
-  region                   = "US_EAST_2"
   electable_nodes          = 3
-  priority                 = 7
   manual_connection        = true
   reference_hour_of_day    = 3
   reference_minute_of_hour = 45
   restore_window_days      = 4
+
+  region_definition = data.terraform_remote_state.devops.outputs.region_definition["unique"]
 
   mongo_atlas_client_id                = var.mongo_atlas_client_id
   mongo_atlas_client_secret            = var.mongo_atlas_client_secret

@@ -1,3 +1,7 @@
+locals {
+  blob_dns_zone_id = var.blob_private_dns_zone_id
+}
+
 #Blob EndPoint
 resource "azurerm_private_endpoint" "storage_blob" {
   name                          = "pep-${var.pe_name}-blob"
@@ -13,8 +17,10 @@ resource "azurerm_private_endpoint" "storage_blob" {
     subresource_names              = ["blob"]
   }
   private_dns_zone_group {
-    name                 = "default"
-    private_dns_zone_ids = [azurerm_private_dns_zone.privatedns_blob.id]
+    name = "default"
+    private_dns_zone_ids = [
+      local.blob_dns_zone_id
+    ]
   }
 }
 
@@ -81,14 +87,16 @@ resource "azurerm_private_endpoint" "storage_file" {
 ##DNS##
 #Storage Account BLOB DNS
 resource "azurerm_private_dns_zone" "privatedns_blob" {
+  count               = var.create_blob_private_dns_zone ? 1 : 0
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = var.resource_group_name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "linktovnet_blob" {
+  count                 = var.create_blob_private_dns_zone ? 1 : 0
   name                  = "pdnsz-linkvnet"
   resource_group_name   = var.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.privatedns_blob.name
+  private_dns_zone_name = azurerm_private_dns_zone.privatedns_blob[0].name
   virtual_network_id    = var.vnet_id
 }
 
