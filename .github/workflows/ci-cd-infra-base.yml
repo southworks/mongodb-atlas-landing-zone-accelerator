@@ -25,7 +25,12 @@ on:
         type: boolean
         default: false
 
-permissions: read-all
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  issues: write
+  actions: read
 
 jobs:
   validate:
