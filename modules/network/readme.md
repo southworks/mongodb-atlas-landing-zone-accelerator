@@ -70,7 +70,7 @@ module "network" {
   private_endpoints = {
     mongodb = {
       name                    = "pe-mongodb"
-      subnet_key              = "private"
+      subnet_key              = "private_endpoints"
       service_connection_name = "psc-mongodb"
       service_resource_id     = module.mongodb_atlas.pe_service_id
       is_manual_connection    = true
