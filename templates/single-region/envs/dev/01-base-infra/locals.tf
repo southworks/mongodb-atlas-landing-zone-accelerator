@@ -138,10 +138,9 @@ locals {
       }
     }
     private_endpoints = {
-      name              = local.region_definition.private_endpoints_subnet_name
-      address_prefixes  = local.region_definition.private_endpoints_subnet_prefixes
-      security_rules    = local.common_security_rules
-      service_endpoints = ["Microsoft.KeyVault"]
+      name             = local.region_definition.private_endpoints_subnet_name
+      address_prefixes = local.region_definition.private_endpoints_subnet_prefixes
+      security_rules   = local.common_security_rules
     }
   }
 }

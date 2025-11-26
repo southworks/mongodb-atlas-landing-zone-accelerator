@@ -24,7 +24,7 @@ module "network" {
   location            = local.region_definition.azure_region
   resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
   vnet_name           = module.naming.virtual_network.name
-  address_space       = local.region_definition.vnet_address_space
+  address_space       = local.region_definition.address_space
   nsg_name            = module.naming.network_security_group.name_unique
   tags                = local.tags
 

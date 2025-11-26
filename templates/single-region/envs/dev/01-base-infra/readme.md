@@ -94,7 +94,7 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 ### Networking Settings
 
 Networking configurations are derived from region definition in Step 0. The values in `locals.tf` include:
-- **vnet_address_space**: Address space for the virtual network
+- **address_space**: Address space for the virtual network
 - **app_workload_subnet_prefixes**: Prefixes for the application workload subnet (MongoDB connectivity)
 - **observability_function_app_subnet_prefixes**: Prefixes for Observability Function App subnet
 - **private_endpoints_subnet_prefixes**: CIDR ranges for the shared Private Endpoint subnet used by all Azure PEs (Monitoring, Key Vault, Observability, etc.)

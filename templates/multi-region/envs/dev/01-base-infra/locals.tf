@@ -157,7 +157,7 @@ locals {
   subnets_definitions = {
     for region_key, region in local.regions :
     region_key => {
-      app_workload = {
+      app_workload_subnet_prefixes = {
         name             = region.app_workload_subnet_name
         address_prefixes = region.app_workload_subnet_prefixes
         security_rules   = merge(local.common_security_rules, local.specific_security_rules)
@@ -179,10 +179,9 @@ locals {
         region.has_keyvault_private_endpoint ||
         region.has_observability_storage_account
         ) ? {
-        name              = region.private_endpoints_subnet_name
-        address_prefixes  = region.private_endpoints_subnet_prefixes
-        security_rules    = local.common_security_rules
-        service_endpoints = ["Microsoft.KeyVault"]
+        name             = region.private_endpoints_subnet_name
+        address_prefixes = region.private_endpoints_subnet_prefixes
+        security_rules   = local.common_security_rules
       } : null
     }
   }

@@ -31,11 +31,11 @@ module "network" {
   private_endpoints = {
     mongodb = {
       name                    = "${module.naming.private_endpoint.name_unique}-mongodb-${each.key}"
-      subnet_key              = "app_workload"
+      subnet_key              = "app_workload_subnet_prefixes"
       service_connection_name = "${module.naming.private_service_connection.name}-mongodb-${each.key}"
       service_resource_id     = module.mongodb_atlas_config.atlas_pe_service_ids[each.key]
       is_manual_connection    = each.value.manual_connection
-      request_message         = "Please approve my MongoDB PE."
+      request_message         = "Mongo DB Atlas Private Endpoint connection from ${local.project_name}."
       tags                    = local.tags
     }
   }
