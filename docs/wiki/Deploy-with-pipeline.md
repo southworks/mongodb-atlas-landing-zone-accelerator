@@ -47,8 +47,8 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
    - Make sure all required environment variables and secrets in GitHub are set using the outputs from step 00. See [Setup-environment.md](Setup-environment.md).
 
 2. **Base Infrastructure (Pipeline)**
-   - Deploys core networking, MongoDB Atlas resources, observability infrastructure, and, if multi-region, configures VNet peering.
-   - For details on observability and function app setup, see [Mongo Atlas Metrics App docs](./MongoAtlasMetrics_deployment_steps.md).
+   - Deploys core networking, MongoDB Atlas resources, observability function infrastructure, and, if multi-region, configures VNet peering.
+   - For details on observability function and function app setup, see [Mongo Atlas Metrics App docs](./MongoAtlasMetrics_deployment_steps.md).
    - **Important:** You need to run this step twice:
      1. **First run:** Set `TF_VAR_open_access=true` to allow Key Vault creation, initial secret injection and to deploy the Azure Function's code.
      2. **Second run:** Set `TF_VAR_open_access=false` to restrict Key Vault and Azure Function network access according to SFI/compliance requirements.
